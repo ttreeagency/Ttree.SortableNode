@@ -1,0 +1,15 @@
+{
+    "name": "ttree/starter",
+    "type": "typo3-flow-package",
+    "description": "Some utilities and services related to TYPO3 Flow, Neos and TYPO3CR package development",
+    "version": null,
+    "license": ["MIT"],
+    "require": {
+        "typo3/flow": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Ttree\\Starter": "Classes"
+        }
+    }
+}
