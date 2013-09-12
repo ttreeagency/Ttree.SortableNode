@@ -1,0 +1,12 @@
+Ttree:
+  Starter:
+    nodeSorting:
+      enable: false
+      configuration:
+        '/sites/officialwebsite/fr/participer':
+          -
+            type: Ttree.Plugin.MicroEvent:Event
+            configuration:
+              type:               simple
+              property:           eventStartDate
+              propertyTargetType: DateTime

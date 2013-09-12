@@ -13,11 +13,12 @@ use TYPO3\Flow\Property\PropertyMappingConfigurationInterface;
 use TYPO3\TYPO3CR\Domain\Model\NodeInterface;
 
 /**
- * Class OrderingService
+ * A service to sort node stored in the content repository
+ *
  * @package Ttree\Plugin\MicroEvent\Service
  * @Flow\Scope("singleton")
  */
-class SortingService {
+class NodeSortingService {
 
 	/**
 	 * @Flow\Inject
@@ -27,9 +28,46 @@ class SortingService {
 
 	/**
 	 * @Flow\Inject
+	 * @var \TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository
+	 */
+	protected $nodeDataRepository;
+
+	/**
+	 * @Flow\Inject
 	 * @var \TYPO3\Flow\Property\PropertyMappingConfigurationBuilder
 	 */
 	protected $propertyMappingConfigurationBuilder;
+
+	/**
+	 * @var array
+	 */
+	protected $settings;
+
+	/**
+	 * @param array $settings
+	 */
+	public function injectSettings(array $settings) {
+		$this->settings = $settings;
+	}
+
+	/**
+	 * @param NodeInterface $parentNode
+	 * @throws \TYPO3\Flow\Exception
+	 */
+	public function decideSortingByParentNode(NodeInterface $parentNode) {
+		$configurationPath = 'nodeSorting.configuration.' . $parentNode->getPath();
+		if (NULL === $configuration = Arrays::getValueByPath($this->settings, $configurationPath)) {
+			return;
+		}
+
+		foreach ($configuration as $subConfiguration) {
+			if (!isset($subConfiguration['type']) || trim($subConfiguration['type']) === '') {
+				throw new Exception('Missing sortable node type setting', 1378377366);
+			}
+
+			$this->orderByNodePathAndType($parentNode, $subConfiguration['type'], $subConfiguration['configuration']);
+		}
+	}
 
 	/**
 	 * @param NodeInterface $parentNode
@@ -38,11 +76,14 @@ class SortingService {
 	 * @throws \TYPO3\Flow\Exception
 	 */
 	public function orderByNodePathAndType(NodeInterface $parentNode, $nodeType, array $configuration) {
-		if (!isset($configuration['sortingType'])) {
-			$configuration['sortingType'] = 'simple';
+		if (!is_string($nodeType) || trim($nodeType) === '') {
+			throw new Exception('Empty or invalid node type', 1378378768);
+		}
+		if (!isset($configuration['type'])) {
+			$configuration['type'] = 'simple';
 		}
 
-		switch ($configuration['sortingType']) {
+		switch ($configuration['type']) {
 			case 'simple':
 				$this->applySimpleSorting($parentNode, $nodeType, $configuration);
 				break;
@@ -57,25 +98,26 @@ class SortingService {
 	 * @param array $configuration
 	 */
 	protected function applySimpleSorting(NodeInterface $parentNode, $nodeType, array $configuration) {
-		$sortingProperty = $configuration['sortingProperty'];
-		$sortingSource   = array();
+		$property      = $configuration['property'];
+		$sortingSource = array();
+		$hasChildNode  = FALSE;
 		foreach ($parentNode->getChildNodes($nodeType) as $node) {
 			/** @var NodeInterface $node */
-			$property        = $this->convertPropertyType($node->getProperty($sortingProperty), $configuration['sortingPropertyTargetType']);
 			$sortingSource[] = array(
-				'path'            => $node->getPath(),
-				'sortingProperty' => $property,
-				'currentIndex'    => $node->getIndex(),
+				'path'         => $node->getPath(),
+				'property'     => $this->convertPropertyType($node->getProperty($property), $configuration['propertyTargetType']),
+				'currentIndex' => $node->getIndex(),
 			);
+			$hasChildNode = TRUE;
+		}
+		if ($hasChildNode === FALSE) {
+			return;
 		}
 		$currentIndexes = $this->extractCurrentIndexes($sortingSource);
 		usort($sortingSource, function ($a, $b) {
-			return $a['sortingProperty'] < $b['sortingProperty'];
+			return $a['property'] < $b['property'];
 		});
 		$this->applySorting($sortingSource, $currentIndexes, $parentNode);
-		foreach (Arrays::arrayMergeRecursiveOverrule($sortingSource, $currentIndexes) as $node) {
-			$parentNode->getNode($node['path'])->setIndex($node['currentIndex']);
-		}
 	}
 
 	/**
