@@ -1,12 +1,54 @@
 Ttree:
-  Starter:
-    nodeSorting:
-      enable: false
-      configuration:
-        '/sites/officialwebsite/fr/participer':
-          -
-            type: Ttree.Plugin.MicroEvent:Event
-            configuration:
-              type:               simple
-              property:           eventStartDate
-              propertyTargetType: DateTime
+  SortableNode:
+    enabled: FALSE
+    defaultSortingStrategy: DumbSortingStrategy
+    configuration:
+      'Ttree.Plugin.MicroEvent:Event':
+        10:
+          position:           'start'
+          label:              'Main sorting for Event node'
+          identifier:         '/sites/officialwebsite/fr/participer'
+          strategy:           'DumbSortingStrategy'
+          properties:
+            # eventStartDate:   ASC
+            title:            ASC
+
+        20:
+          position:           '20'
+          label:              'Sorting for Event node for a specific path'
+          identifier:         '/sites/officialwebsite'
+          strategy:           'DumbSortingStrategy'
+          enabled:            FALSE
+          properties:
+            title:            DESC
+
+        22:
+          position:           '22'
+          label:              'Sorting for Event node for a specific path'
+          identifier:         '/sites/officialwebsite/fr/participer'
+          strategy:           'HeapSortingStrategy'
+          enabled:            FALSE
+          properties:
+            eventStartDate:   ASC
+            title:            ASC
+
+        30:
+          position:           '30'
+          label:              'Sorting for Event node for a specific path, not applied automaticaly'
+          identifier:         '/sites/officialwebsite/fr/other/path'
+          strategy:           'HeapSortingStrategy'
+          enabled:            FALSE
+          properties:
+            eventStartDate:   ASC
+            eventEndDate:     ASC
+            title:            ASC
+
+        40:
+          position:           'end'
+          label:              'Sorting for Event node for a specific node identifier'
+          identifier:         '87447bd0-8063-6cac-69e3-5307fac03ad6'
+          strategy:           'ElasticSearchSortingStrategy'
+          enabled:            FALSE
+          properties:
+            eventStartDate:   ASC
+            title:            ASC

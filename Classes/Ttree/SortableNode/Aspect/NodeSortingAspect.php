@@ -1,8 +1,8 @@
 <?php
-namespace Ttree\Starter\Aspect;
+namespace Ttree\SortableNode\Aspect;
 
 /*                                                                        *
- * This script belongs to the TYPO3 Flow package "Ttree.Starter".         *
+ * This script belongs to the TYPO3 Flow package "Ttree.SortableNode".         *
  *                                                                        *
  *                                                                        */
 
@@ -13,7 +13,7 @@ use TYPO3\TYPO3CR\Domain\Model\NodeData;
 /**
  * An aspect to force sorting node in the TYPO3CR
  *
- * @package Ttree\Starter\Aspect
+ * @package Ttree\SortableNode\Aspect
  * @Flow\Scope("singleton")
  * @Flow\Aspect
  */
@@ -21,7 +21,7 @@ class NodeSortingAspect {
 
 	/**
 	 * @Flow\Inject
-	 * @var \Ttree\Starter\Service\NodeSortingService
+	 * @var \Ttree\SortableNode\Service\NodeSortingService
 	 */
 	protected $nodeSortingService;
 
@@ -33,7 +33,7 @@ class NodeSortingAspect {
 
 	/**
 	 * @param JoinPointInterface $joinPoint
-	 * @Flow\After("setting(Ttree.Starter.nodeSorting.enable) && method(TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository->(update|add)())")
+	 * @Flow\After("setting(Ttree.SortableNode.enabled) && method(TYPO3\TYPO3CR\Domain\Repository\NodeDataRepository->(update|add)())")
 	 */
 	public function sortNodesAfterUpdateOrCreate(JoinPointInterface $joinPoint) {
 		/** @var NodeData $nodeData */
