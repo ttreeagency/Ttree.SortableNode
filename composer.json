@@ -2,7 +2,6 @@
     "name": "ttree/sortablenode",
     "type": "typo3-flow-package",
     "description": "This package allow complexe node sorting strategies",
-    "version": null,
     "license": ["MIT"],
     "require": {
         "typo3/flow": "*"
